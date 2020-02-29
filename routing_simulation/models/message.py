@@ -4,6 +4,7 @@ from typing import List
 
 @dataclass()
 class Message:
+    original_node: int
     origin: int
     destination: int
     data: List[int]

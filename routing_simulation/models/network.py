@@ -2,10 +2,10 @@ from dataclasses import dataclass, field
 from typing import List, Tuple
 
 from networkx import Graph
-from simpy import Environment, FilterStore, Resource
+from simpy import FilterStore, Store, Environment
 
-from routing_simulation.models.router import Router
 from routing_simulation.models.link import Link
+from routing_simulation.models.router import Router
 
 
 @dataclass()
@@ -13,7 +13,7 @@ class Network:
     env: Environment
     available_links: FilterStore
     pending_messages: FilterStore
-    sent_messages: Resource
+    sent_messages: Store
     topology: Graph = field(default=None)
     random_graph: Tuple[int, int] = field(default=None)
     MAX_WEIGHT = 5000
@@ -33,7 +33,7 @@ class Network:
         if start_node is None:
             raise RuntimeError('Invalid start node')
 
-        self.env.process(start_node.send_message(Message(origin, destination, data)))
+        self.env.process(start_node.send_message(Message(origin, origin, destination, data)))
 
         for i in self.topology.nodes:
             node = self.topology.nodes[i]['data']
