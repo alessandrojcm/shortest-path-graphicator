@@ -46,6 +46,16 @@ class Network:
         self.__init_nodes()
         self.__init_edges()
 
+    def from_csv(self, data):
+        import networkx as nx
+        self.topology = nx.Graph()
+
+        for row in data:
+            start, end, weight = row
+            self.topology.add_edge(int(start), int(end), weight=float(weight))
+        self.__init_nodes()
+        self.__init_edges()
+
     def set_frame(self, data: List[int], origin: int, destination: int):
         from routing_simulation.models.message import Message
 
@@ -70,7 +80,7 @@ class Network:
         node_mappings = {
             k: Router(self.env, self.topology, self.available_links, self.pending_messages, self.sent_messages,
                       self.log, k,
-                      bellman_ford_path) for k in range(self.topology.number_of_nodes())
+                      bellman_ford_path) for k in self.topology.nodes
         }
         set_node_attributes(self.topology, node_mappings, 'data')
 

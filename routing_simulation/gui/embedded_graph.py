@@ -39,6 +39,7 @@ class EmbeddedGraph(QWidget):
         pub.subscribe(self.__paint_path, 'links')
         pub.subscribe(self.set_package, 'send_package')
         pub.subscribe(self.from_dotfile, 'load_dotfile')
+        pub.subscribe(self.load_csv, 'load_csv')
 
         self.initUI()
         self.__setup_network()
@@ -89,6 +90,18 @@ class EmbeddedGraph(QWidget):
             print(err)
             self.__error_message(
                 'Error cargando archivo DOT, por favor verifique que cada arista tenga peso (con la propiedad label)')
+            return
+        self.pos = nx.random_layout(self.network.topology)
+        self.__draw_network()
+        self.verticalGroupBox.findChild(QPushButton, 'send_package').setEnabled(True)
+
+    def load_csv(self, file):
+        try:
+            self.network.from_csv(file)
+        except Exception as err:
+            print(err)
+            self.__error_message(
+                'Error cargando archivo csv, por favor verifique que está de la forma origen,destino,peso')
             return
         self.pos = nx.random_layout(self.network.topology)
         self.__draw_network()

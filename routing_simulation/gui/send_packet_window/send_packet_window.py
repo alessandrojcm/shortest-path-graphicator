@@ -19,11 +19,9 @@ class SendPacketWindow(QDialog):
 
     def __init_widgets(self, max_node):
         self.origin = self.findChild(QSpinBox, 'origin')
-        self.origin.setMaximum(max_node)
         self.origin.setMinimum(0)
 
         self.destination = self.findChild(QSpinBox, 'destination')
-        self.destination.setMaximum(max_node)
         self.destination.setMinimum(0)
 
         self.packet = self.findChild(QLineEdit, 'packet')

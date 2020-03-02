@@ -84,7 +84,12 @@ class RoutingSimulator(QMainWindow):
 
         if accepted:
             stem = Path(filename).suffix
-            with open(filename) as file:
-                if stem == '.dot':
-                    from pydot import graph_from_dot_file
-                    pub.sendMessage('load_dotfile', file=graph_from_dot_file(filename)[0])
+            if stem == '.dot':
+                from pydot import graph_from_dot_file
+                pub.sendMessage('load_dotfile', file=graph_from_dot_file(filename)[0])
+            elif stem == '.csv':
+                from csv import reader
+
+                with open(filename) as csvfile:
+                    graph_reader = reader(csvfile)
+                    pub.sendMessage('load_csv', file=graph_reader)
