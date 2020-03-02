@@ -7,19 +7,26 @@ from simpy import FilterStore, Store, Environment
 from routing_simulation.models.link import Link
 from routing_simulation.models.router import Router
 
-
+# Class to represent a network comprised of a graph
 @dataclass()
 class Network:
+    # Simpy environment
     env: Environment
+    # Links that are currently busy
     available_links: FilterStore
+    # Messages pendind to transmit
     pending_messages: FilterStore
+    # Messages delivered successfully
     sent_messages: Store
+    # Log of the operations
     log: Store
+    # The network
     topology: Graph = field(default=None)
     random_graph: Tuple[int, int] = field(default=None)
     MAX_WEIGHT = 5000
 
     def __post_init__(self):
+        # If graph was set as random, is also possible to start a network with no topology.
         if self.topology is None and self.random_graph:
             from networkx import random_regular_graph
             m, n = self.random_graph
@@ -39,6 +46,7 @@ class Network:
         import networkx as nx
         self.topology = nx.Graph(nx.nx_pydot.from_pydot(data))
         self.topology = nx.convert_node_labels_to_integers(self.topology)
+        # Parse labels as floats
         edge_mappings = {
             (s, d): {'weight': float(l['label'])} for s, d, l in self.topology.edges.data()
         }
@@ -57,14 +65,17 @@ class Network:
         self.__init_edges()
 
     def set_frame(self, data: List[int], origin: int, destination: int):
+        # Set the data for the transmission
         from routing_simulation.models.message import Message
 
         start_node = self.topology.nodes[origin]['data']
         if start_node is None:
             raise RuntimeError('Invalid start node')
 
+        # Register the start node
         self.env.process(start_node.send_message(Message(origin, origin, destination, data)))
 
+        # Register all the other nodes to check for incoming transmissions
         for i in self.topology.nodes:
             node = self.topology.nodes[i]['data']
             if node.name == origin:
@@ -75,6 +86,7 @@ class Network:
         return self.env.run()
 
     def __init_nodes(self):
+        # Iterate through all the nodes and init a Router class as attribute
         from networkx import bellman_ford_path, set_node_attributes
 
         node_mappings = {
@@ -85,6 +97,7 @@ class Network:
         set_node_attributes(self.topology, node_mappings, 'data')
 
     def __init_edges(self):
+        # Iterate to all the edges and init a Link class as attribute
         from random import randint
         from networkx import set_edge_attributes
         edge_mappings = {
@@ -93,7 +106,7 @@ class Network:
         }
         set_edge_attributes(self.topology, edge_mappings)
 
-
+# Factory function
 def network_setup(realtime=False):
     import simpy
     if not realtime:

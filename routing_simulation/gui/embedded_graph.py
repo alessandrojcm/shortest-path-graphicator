@@ -14,14 +14,14 @@ from routing_simulation.gui.send_packet_window.send_packet_window import SendPac
 from routing_simulation.utils import patch_resource, items_spy
 
 
-# From: https://stackoverflow.com/questions/35328916/embedding-a-networkx-graph-into-pyqt-widget
-
-
+# Embedded graph
+# Most of this is taken from: https://stackoverflow.com/questions/35328916/embedding-a-networkx-graph-into-pyqt-widget
 class EmbeddedGraph(QWidget):
+    # Hash for label/actions
     NumButtons = {
-        'random_network': 'Red aleatoria',
-        'send_package': 'Enviar paquete',
-        'start_simulation': 'Iniciar simulación'
+        'random_network': 'Random network',
+        'send_package': 'Send package',
+        'start_simulation': 'Start simulation'
     }
     IDLE = 'blue'
     SELECTED = 'red'
@@ -36,6 +36,7 @@ class EmbeddedGraph(QWidget):
         self.pos = None
 
         font.setPointSize(16)
+        # Uses Pypubsub for pub/sub mechanism
         pub.subscribe(self.__paint_path, 'links')
         pub.subscribe(self.set_package, 'send_package')
         pub.subscribe(self.from_dotfile, 'load_dotfile')
@@ -71,6 +72,7 @@ class EmbeddedGraph(QWidget):
             layout.setSpacing(10)
             self.verticalGroupBox.setLayout(layout)
             button.clicked.connect(self.submitCommand)
+        # Disable this until graph is defined
         self.verticalGroupBox.findChild(QPushButton, 'start_simulation').setEnabled(False)
         self.verticalGroupBox.findChild(QPushButton, 'send_package').setEnabled(False)
 
@@ -81,6 +83,7 @@ class EmbeddedGraph(QWidget):
         self.network.init_random_graph()
         self.pos = nx.spring_layout(self.network.topology)
         self.__draw_network()
+        # Enable since graph is defined
         self.verticalGroupBox.findChild(QPushButton, 'send_package').setEnabled(True)
 
     def from_dotfile(self, file):
@@ -93,6 +96,7 @@ class EmbeddedGraph(QWidget):
             return
         self.pos = nx.random_layout(self.network.topology)
         self.__draw_network()
+        # Enable since graph is defined
         self.verticalGroupBox.findChild(QPushButton, 'send_package').setEnabled(True)
 
     def load_csv(self, file):
@@ -105,6 +109,7 @@ class EmbeddedGraph(QWidget):
             return
         self.pos = nx.random_layout(self.network.topology)
         self.__draw_network()
+        # Enable since graph is defined
         self.verticalGroupBox.findChild(QPushButton, 'send_package').setEnabled(True)
 
     def send_package(self):
@@ -117,16 +122,19 @@ class EmbeddedGraph(QWidget):
         try:
             bellman_ford_path(self.network.topology, origin, destination)
         except NetworkXNoPath:
-            self.__error_message('No hay ruta entre nodo {o} y nodo {d}'.format(o=origin, d=destination))
+            self.__error_message('No route between node {o} and node {d}'.format(o=origin, d=destination))
             return
         except NodeNotFound:
-            self.__error_message('Nodo de origen o destino no está en el grafo.')
+            self.__error_message('Origin can\'t be the same as destination.')
             return
+        except KeyError:
+            self.__error_message('Node not in graph')
 
         self.verticalGroupBox.findChild(QPushButton, 'start_simulation').setEnabled(True)
         self.paint_nodes()
 
     def paint_nodes(self):
+        # Utility method to paint the nodes that are part of the path
         origin, destination, payload = self.data
         node_cols = [self.IDLE if i != origin and i != destination else self.SELECTED for i in
                      self.network.topology.nodes()]
@@ -148,6 +156,7 @@ class EmbeddedGraph(QWidget):
         self.network.start()
 
     def __draw_network(self, node_colors=None):
+        # Utility method to paint the graph
         self.figure.clf()
         labels = {k: str(v) for k, v in nx.get_edge_attributes(self.network.topology, 'weight').items()}
         if not node_colors:
@@ -158,17 +167,20 @@ class EmbeddedGraph(QWidget):
         self.canvas.draw_idle()
 
     def __patch_resource(self):
+        # Patching the Simpy resources
         monitor = partial(items_spy, lambda d: pub.sendMessage('links', data=d))
 
         patch_resource(self.network.available_links, post=monitor)
 
     def __paint_path(self, data):
+        # Utility method to paint the edges of the path
         nx.draw_networkx_edges(self.network.topology, self.pos, data, edge_color=self.SELECTED)
         nx.draw_networkx_nodes(self.network.topology, self.pos, list(set([node for edge in data for node in edge])),
                                node_color=self.SELECTED)
         self.canvas.draw_idle()
 
     def __print_messages(self):
+        # Prins operations to log window
         while True:
             with self.network.log.get() as rq:
                 message = yield rq
@@ -176,6 +188,7 @@ class EmbeddedGraph(QWidget):
                     self.log.append(message)
 
     def __setup_network(self):
+        # Utility method to set up the Network
         graph = None
         if self.network is not None and self.network.topology is not None:
             graph = self.network.topology

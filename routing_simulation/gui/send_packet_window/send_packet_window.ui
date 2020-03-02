@@ -53,7 +53,7 @@
       <item>
        <widget class="QLabel" name="origin_label">
         <property name="text">
-         <string>Nodo origen</string>
+         <string>Start node</string>
         </property>
        </widget>
       </item>
@@ -63,7 +63,7 @@
       <item>
        <widget class="QLabel" name="destination_label">
         <property name="text">
-         <string>Nodo destino</string>
+         <string>End node</string>
         </property>
        </widget>
       </item>
@@ -77,7 +77,7 @@
       <item>
        <widget class="QLabel" name="packet_label">
         <property name="text">
-         <string>Paquete</string>
+         <string>Payload</string>
         </property>
        </widget>
       </item>

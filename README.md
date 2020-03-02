@@ -1,6 +1,4 @@
-===============================
-Shortest path plotter
-===============================
+# Shortest path plotter
 
 This is a PyQt5 app whose purpose is to plot the shortest path between two nodes of a undirected
 weighted graph, it uses NetworkX and Matplotlib. The purpose of the app is to simulate the shortest
@@ -88,7 +86,7 @@ Credits
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+- _Cookiecutter: https://github.com/audreyr/cookiecutter
+- _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
 
  

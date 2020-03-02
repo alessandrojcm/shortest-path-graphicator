@@ -1,5 +1,7 @@
 from functools import wraps
 
+# This file has several utility functions to monitor the simulation
+# check: https://simpy.readthedocs.io/en/latest/topical_guides/monitoring.html
 
 # Calls pre and post before an after resource acquisition
 def patch_resource(resource, pre=None, post=None):

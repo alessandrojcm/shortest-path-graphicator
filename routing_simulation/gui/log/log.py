@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets, uic
 
 from routing_simulation.utils import real_path
 
-
+# CLass that acts as a log
 class Log(QtWidgets.QWidget):
     log: QtWidgets.QPlainTextEdit
 
@@ -10,7 +10,7 @@ class Log(QtWidgets.QWidget):
         super(Log, self).__init__()
         uic.loadUi(real_path('log.ui', __file__), self)
         self.log = self.findChild(QtWidgets.QPlainTextEdit, 'log')
-        self.setWindowTitle('Log de mensajes')
+        self.setWindowTitle('Operation log')
 
     def append(self, text):
         self.log.appendPlainText(text)

@@ -7,6 +7,8 @@ from pubsub import pub
 from routing_simulation import Network
 from routing_simulation.utils import patch_resource, items_spy
 
+# File for testing, it creates a Mycielski graph and runs the simulation
+
 MAX_NODES = 10
 
 graph = nx.generators.mycielski.mycielski_graph(MAX_NODES)
