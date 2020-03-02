@@ -8,7 +8,7 @@ the shortest path.
 Also, it uses Simpy to simulate the packet traversal from one node to another.
 
 ### Installation
-* Install (poetry)[https://python-poetry.org/docs/]
+* Install [poetry](https://python-poetry.org/docs/)
 * Run ```poetry install```
 * Run ```main.py```
 
@@ -40,10 +40,10 @@ grapph {
 ``` 
 
 Which means an adjacency matrix for the graph, for more information refer to the DOT language 
-(specification)[https://graphviz.gitlab.io/_pages/doc/info/lang.html].
+[specification](https://graphviz.gitlab.io/_pages/doc/info/lang.html).
 
 **Important**: edges must have the ```label``` property set to a number as this will be parsed as the edge weight. 
-Non integer node names with be converted to numbers.
+Non integer node names will be converted to numbers.
 
 Refer to the ```test.dot``` file for an example.
 
@@ -57,11 +57,11 @@ The file must have the ```.csv``` and the following format:
 ```
 
 Where the first element is the start node, the next element the end node and the next element the weight
-of the graph that connects them. All nodes must be integers. Refer to the ```test.csv``` file for an example.
+of the edge that connects them. All nodes must be integers. Refer to the ```test.csv``` file for an example.
 
 ## Data set
 
-After creating the graph, click "Set package" to select the start and end node; as well as the data.
+After creating the graph, click "Set package" to select the start and end node, as well as the data.
 A window will pop up, select the start and end node and enter the "package"; it mus be comprised of 0 or 1
 and can be no longer that 8 (meaning a binary package of 8 bits).
 
