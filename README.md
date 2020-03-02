@@ -79,6 +79,7 @@ is greater than the simulation time)
 * Allow the user to set the nodes, edges and weight of the random graph
 * Allow for the nodes to have non integer labels
 * Make Data configuration window don't close on error
+* Add "Step" button to run the simulation step by step (see [this](https://simpy.readthedocs.io/en/latest/api_reference/simpy.core.html#simpy.core.Environment.step))
 * The GUI is (in my opinion) a _little_ tighly coupled to the logic, decoupling this a bit more
 could be useful
 * Upgrades on the GUI (more cues, come up with a better idea than the log window, etc)
