@@ -14,6 +14,7 @@ class Network:
     available_links: FilterStore
     pending_messages: FilterStore
     sent_messages: Store
+    log: Store
     topology: Graph = field(default=None)
     random_graph: Tuple[int, int] = field(default=None)
     MAX_WEIGHT = 5000
@@ -23,10 +24,18 @@ class Network:
             from networkx import random_regular_graph
             m, n = self.random_graph
             self.topology = random_regular_graph(m, n)
+        elif self.topology is not None:
+            self.__init_nodes()
+            self.__init_edges()
+
+    def init_random_graph(self, random_graph: Tuple[int, int] = (4, 10)):
+        from networkx import random_regular_graph
+        m, n = random_graph
+        self.topology = random_regular_graph(m, n)
         self.__init_nodes()
         self.__init_edges()
 
-    def send_frame(self, data: List[int], origin: int, destination: int):
+    def set_frame(self, data: List[int], origin: int, destination: int):
         from routing_simulation.models.message import Message
 
         start_node = self.topology.nodes[origin]['data']
@@ -40,13 +49,16 @@ class Network:
             if node.name == origin:
                 pass
             self.env.process(node.receive())
-        self.env.run()
+
+    def start(self):
+        return self.env.run()
 
     def __init_nodes(self):
         from networkx import bellman_ford_path, set_node_attributes
 
         node_mappings = {
-            k: Router(self.env, self.topology, self.available_links, self.pending_messages, self.sent_messages, k,
+            k: Router(self.env, self.topology, self.available_links, self.pending_messages, self.sent_messages,
+                      self.log, k,
                       bellman_ford_path) for k in range(self.topology.number_of_nodes())
         }
         set_node_attributes(self.topology, node_mappings, 'data')
@@ -55,7 +67,21 @@ class Network:
         from random import randint
         from networkx import set_edge_attributes
         edge_mappings = {
-            (s, d): Link(d if d else randint(self.MAX_WEIGHT), (s, d)).to_dict() for s, d, data in
+            (s, d): Link(d if d else randint(0, self.MAX_WEIGHT), (s, d)).to_dict() for s, d, data in
             self.topology.edges.data()
         }
         set_edge_attributes(self.topology, edge_mappings)
+
+
+def network_setup(realtime=False):
+    import simpy
+    if not realtime:
+        env = simpy.Environment()
+    else:
+        env = simpy.RealtimeEnvironment(strict=False, factor=2)
+    available_links = simpy.FilterStore(env)
+    pending_messages = simpy.FilterStore(env)
+    send_messages = simpy.Store(env)
+    log = simpy.Store(env)
+
+    return Network(env, available_links, pending_messages, send_messages, log)

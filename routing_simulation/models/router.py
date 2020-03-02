@@ -14,6 +14,7 @@ class Router:
     available_links: FilterStore
     pending_messages: FilterStore
     sent_messages: Store
+    log: Store
     name: int
     shortest_path: Callable[[int, int], List[int]]
 
@@ -26,44 +27,48 @@ class Router:
     def as_dict(self):
         return asdict(self)
 
-    def send_message(self, message: Message):
+    def send_message(self, message: Message, resent=False):
         try:
-            if not message.next_node and message.origin != self.name:
-                self.env.exit()
             next_node = self.shortest_path(self.topology, message.origin, message.destination)[1]
             out_link = self.__take_link(message.origin, next_node)
             out_message = replace(message, next_node=next_node, link=out_link)
-            print('Sending message {d} from node {o} to node {fn} through link {l}'.format(
-                d=out_message.data,
-                o=out_message.origin,
-                fn=out_message.destination,
-                l=out_message.link
-            ))
+            if not resent:
+                self.log.put('Sending message {d} from node {o} to node {fn} through link {l}'.format(
+                    d=out_message.data,
+                    o=out_message.origin,
+                    fn=out_message.destination,
+                    l=out_message.link
+                ))
             yield self.pending_messages.put(out_message)
         except Interrupt as err:
             from sys import stderr
             stderr.write(err)
 
     def receive(self):
-        while True:
-            try:
-                inbound_message = yield self.pending_messages.get(lambda m: m.next_node == self.name)
+        try:
+            with self.pending_messages.get(lambda m: m.next_node == self.name) as g:
+                inbound_message = yield g
                 self.available_links.put(inbound_message.link)
                 if inbound_message.destination != self.name:
-                    print('{i} node resent message {d} from node {p} to node {fn} through link {l}'.format(
+                    self.log.put('Node {i} resent message {d} from node {p} to node {fn} through link {l}'.format(
                         i=self.name,
                         d=inbound_message.data,
                         p=inbound_message.origin,
                         fn=inbound_message.destination,
                         l=inbound_message.link
                     ))
-                    self.env.process(self.send_message(replace(inbound_message, origin=self.name)))
+                    self.env.process(self.send_message(replace(inbound_message, origin=self.name), resent=True))
                 else:
-                    yield self.sent_messages.put(inbound_message)
+                    yield self.log.put('{i} node received message {d} from node {p} through link {l}'.format(
+                        i=self.name,
+                        d=inbound_message.data,
+                        p=inbound_message.origin,
+                        l=inbound_message.link
+                    ))
 
-            except Interrupt as err:
-                from sys import stderr
-                stderr.write(err)
+        except Interrupt as err:
+            from sys import stderr
+            stderr.write(err)
 
     def __take_link(self, origin, destination):
         out_link = self.topology.edges[origin, destination]['name']

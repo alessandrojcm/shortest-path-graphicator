@@ -38,4 +38,4 @@ patch_resource(available_links, pre=items_spy, post=items_spy)
 env.process(print_messages(sent_messages))
 
 network = Network(env, available_links, pending_messages, sent_messages, graph)
-network.send_frame([1, 1, 1], 0, MAX_NODES)
+network.set_frame([1, 1, 1], 0, MAX_NODES)

@@ -30,4 +30,4 @@ def test_simulation(simpy_env, graph):
     env, links, messages, sent_messages = simpy_env
     network = Network(env, links, messages, sent_messages, graph)
 
-    network.send_frame([1, 1, 1], 0, MAX_NODES)
+    network.set_frame([1, 1, 1], 0, MAX_NODES)
