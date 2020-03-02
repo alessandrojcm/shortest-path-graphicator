@@ -13,6 +13,7 @@ numpy = "^1.18.1"
 pypubsub = "^4.0.3"
 pyqt5 = {'file' = './PyQt5-5.14.1-5.14.1-cp35.cp36.cp37.cp38-none-win_amd64.whl'}
 networkx = "^2.4"
+pydot = "^1.4.1"
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "^3.6"

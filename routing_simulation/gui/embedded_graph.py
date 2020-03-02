@@ -33,10 +33,12 @@ class EmbeddedGraph(QWidget):
         self.network = None
         self.log = Log()
         self.data = None
+        self.pos = None
 
         font.setPointSize(16)
         pub.subscribe(self.__paint_path, 'links')
         pub.subscribe(self.set_package, 'send_package')
+        pub.subscribe(self.from_dotfile, 'load_dotfile')
 
         self.initUI()
         self.__setup_network()
@@ -80,22 +82,32 @@ class EmbeddedGraph(QWidget):
         self.__draw_network()
         self.verticalGroupBox.findChild(QPushButton, 'send_package').setEnabled(True)
 
+    def from_dotfile(self, file):
+        try:
+            self.network.from_pydot(file)
+        except Exception as err:
+            print(err)
+            self.__error_message(
+                'Error cargando archivo DOT, por favor verifique que cada arista tenga peso (con la propiedad label)')
+            return
+        self.pos = nx.random_layout(self.network.topology)
+        self.__draw_network()
+        self.verticalGroupBox.findChild(QPushButton, 'send_package').setEnabled(True)
+
     def send_package(self):
         SendPacketWindow(self.network.topology.number_of_nodes()).show()
 
     def set_package(self, data):
-        from networkx import bellman_ford_path, NetworkXNoPath
+        from networkx import bellman_ford_path, NetworkXNoPath, NodeNotFound
         self.data = data
         origin, destination, _ = data
         try:
             bellman_ford_path(self.network.topology, origin, destination)
         except NetworkXNoPath:
-            message_box = QMessageBox()
-            message_box.setText('No hay ruta entre nodo {o} y nodo {d}'.format(o=origin, d=destination))
-            message_box.setWindowTitle('Error')
-            message_box.setIcon(QMessageBox.Warning)
-            message_box.setStandardButtons(QMessageBox.Close)
-            message_box.exec_()
+            self.__error_message('No hay ruta entre nodo {o} y nodo {d}'.format(o=origin, d=destination))
+            return
+        except NodeNotFound:
+            self.__error_message('Nodo de origen o destino no está en el grafo.')
             return
 
         self.verticalGroupBox.findChild(QPushButton, 'start_simulation').setEnabled(True)
@@ -117,7 +129,6 @@ class EmbeddedGraph(QWidget):
     def start_simulation(self):
         self.paint_nodes()
         origin, destination, payload = self.data
-
 
         self.log.clear()
         self.network.set_frame(payload, origin, destination)
@@ -160,3 +171,11 @@ class EmbeddedGraph(QWidget):
         if graph:
             self.network.topology = graph
         self.__patch_resource()
+
+    def __error_message(self, message):
+        message_box = QMessageBox()
+        message_box.setText(message)
+        message_box.setWindowTitle('Error')
+        message_box.setIcon(QMessageBox.Warning)
+        message_box.setStandardButtons(QMessageBox.Close)
+        message_box.exec_()

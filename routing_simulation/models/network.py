@@ -35,6 +35,17 @@ class Network:
         self.__init_nodes()
         self.__init_edges()
 
+    def from_pydot(self, data):
+        import networkx as nx
+        self.topology = nx.Graph(nx.nx_pydot.from_pydot(data))
+        self.topology = nx.convert_node_labels_to_integers(self.topology)
+        edge_mappings = {
+            (s, d): {'weight': float(l['label'])} for s, d, l in self.topology.edges.data()
+        }
+        nx.set_edge_attributes(self.topology, edge_mappings)
+        self.__init_nodes()
+        self.__init_edges()
+
     def set_frame(self, data: List[int], origin: int, destination: int):
         from routing_simulation.models.message import Message
 
@@ -67,7 +78,7 @@ class Network:
         from random import randint
         from networkx import set_edge_attributes
         edge_mappings = {
-            (s, d): Link(d if d else randint(0, self.MAX_WEIGHT), (s, d)).to_dict() for s, d, data in
+            (s, d): Link(data['weight'] if data else randint(0, self.MAX_WEIGHT), (s, d)).to_dict() for s, d, data in
             self.topology.edges.data()
         }
         set_edge_attributes(self.topology, edge_mappings)

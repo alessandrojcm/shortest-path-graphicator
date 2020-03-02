@@ -2,6 +2,7 @@ import pkg_resources
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QAction, QApplication, QToolBar, QFileDialog
+from pubsub import pub
 
 from routing_simulation.gui.about_dialog import AboutDialog
 from routing_simulation.gui.embedded_graph import EmbeddedGraph
@@ -76,10 +77,14 @@ class RoutingSimulator(QMainWindow):
         self.tool_bar.addAction(tool_bar_open_action)
 
     def open_file(self):
+        from pathlib import Path
         """Open a QFileDialog to allow the user to open a file into the application."""
         filename, accepted = QFileDialog.getOpenFileName(self, 'Open File',
                                                          filter='DOT files (*.dot);; CSV files (*.csv)')
 
         if accepted:
+            stem = Path(filename).suffix
             with open(filename) as file:
-                file.read()
+                if stem == '.dot':
+                    from pydot import graph_from_dot_file
+                    pub.sendMessage('load_dotfile', file=graph_from_dot_file(filename)[0])
