@@ -1,5 +1,7 @@
 # Shortest path plotter
 
+![Main menu demo](demo.gif)
+
 This is a PyQt5 app whose purpose is to plot the shortest path between two nodes of a undirected
 weighted graph, it uses NetworkX and Matplotlib. The purpose of the app is to simulate the shortest
 path calculation of a routing algorithm, because of this it uses the Bellman-Ford algorithm to calculate 
@@ -43,7 +45,7 @@ Which means an adjacency matrix for the graph, for more information refer to the
 [specification](https://graphviz.gitlab.io/_pages/doc/info/lang.html).
 
 **Important**: edges must have the ```label``` property set to a number as this will be parsed as the edge weight. 
-Non integer node names will be converted to numbers.
+Non integer node names with be converted to numbers.
 
 Refer to the ```test.dot``` file for an example.
 
@@ -57,11 +59,11 @@ The file must have the ```.csv``` and the following format:
 ```
 
 Where the first element is the start node, the next element the end node and the next element the weight
-of the edge that connects them. All nodes must be integers. Refer to the ```test.csv``` file for an example.
+of the graph that connects them. All nodes must be integers. Refer to the ```test.csv``` file for an example.
 
 ## Data set
 
-After creating the graph, click "Set package" to select the start and end node, as well as the data.
+After creating the graph, click "Set package" to select the start and end node; as well as the data.
 A window will pop up, select the start and end node and enter the "package"; it mus be comprised of 0 or 1
 and can be no longer that 8 (meaning a binary package of 8 bits).
 
