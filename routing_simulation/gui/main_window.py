@@ -15,7 +15,7 @@ class RoutingSimulator(QMainWindow):
         """Initialize the components of the main window."""
         super(RoutingSimulator, self).__init__(parent)
         self.resize(1024, 768)
-        self.setWindowTitle('Simulador de encaminamiento')
+        self.setWindowTitle('Shortest path plotter')
         window_icon = pkg_resources.resource_filename('routing_simulation.images',
                                                       'ic_insert_drive_file_black_48dp_1x.png')
         self.setWindowIcon(QIcon(window_icon))
